@@ -62,15 +62,6 @@ public:
 			return some_leaf;
 		}
 
-		// loop through primitives and sort into left and right voxels
-		for(auto prim : vpPrims) {
-			if(prim.get()->calcBounds().m_max[splitDim] < splitVal) {
-				vpPrims_left.push_back(prim);
-			} else {
-				vpPrims_right.push_back(prim);
-			}
-		}
-
 		// initialize new voxels
 		for(int i=0; i<3; i++) {
 			voxel_left.m_min[i] = box.m_min[i];
@@ -79,10 +70,24 @@ public:
 			voxel_right.m_min[i] = box.m_min[i];
 			voxel_right.m_max[i] = box.m_max[i];
 		}
-
 		// adjust voxels appropriately
 		voxel_left.m_max[splitDim] = splitVal;
 		voxel_right.m_min[splitDim] += voxel_right.m_max[splitDim] - splitVal;
+
+		// loop through primitives and sort into left and right voxels
+		for(auto prim : vpPrims) {
+			if(prim.get()->inVoxel(voxel_left)) {
+					vpPrims_left.push_back(prim);
+			} else if(prim.get()->inVoxel(voxel_right)) {
+				vpPrims_right.push_back(prim);
+			}
+			// if(prim.get()->calcBounds().m_max[splitDim] < splitVal) {
+			// 	vpPrims_left.push_back(prim);
+			// } else {
+			// 	vpPrims_right.push_back(prim);
+			// }
+		}
+
 
 		// get the right and left voxels
 		pLeft =  BuildTree(voxel_left, vpPrims_left, depth+1);

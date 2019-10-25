@@ -75,10 +75,7 @@ public:
 				return near->traverse(ray, t0, t1);
 			}
 			else if (d < t0) {
-				// return far->traverse(ray, t0, t1);
-				if(far->traverse(ray, t0, t1)) return true;
-				else if(far != m_pRight)
-				    return m_pRight->traverse(ray, t0, t1);
+				return far->traverse(ray, t0, t1);
 			}
 			else {
 				if(near->traverse(ray, t0, d)) {
