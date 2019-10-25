@@ -70,15 +70,9 @@ public:
 			// near = m_pLeft;
 			// far = m_pRight;
 
-			if (ray.dir[m_splitDim] < 0) {
-				std::swap(near, far);
-			}
-
 			if (d > t1 || d < 0) {
 				// return near->traverse(ray, t0, t1);
-				if(near->traverse(ray, t0, t1)) return true;
-				else if(near != m_pLeft)
-				    return m_pLeft->traverse(ray, t0, t1);
+				return near->traverse(ray, t0, t1);
 			}
 			else if (d < t0) {
 				// return far->traverse(ray, t0, t1);
@@ -88,19 +82,10 @@ public:
 			}
 			else {
 				if(near->traverse(ray, t0, d)) {
-                    if(ray.t <= d) return true;
-					else if(near != m_pLeft) {
-					    if(m_pLeft->traverse(ray, t0, d))
-						    if(ray.t < d)return true;
-					}
+					return true;
 				} 
                 
-				if(far->traverse(ray, d, t1)) return true;
-				else if(far != m_pRight) {
-					return (m_pRight->traverse(ray, d, t1));
-				}
-
-				// return far->traverse(ray, d, t1);
+				return far->traverse(ray, d, t1);
 			}
 		}
 	}

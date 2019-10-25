@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.h"
+#include "ray.h"
 
 struct Ray;
 
@@ -41,6 +42,10 @@ public:
 	void extend(Vec3f a)
 	{
 		// --- PUT YOUR CODE HERE ---
+		for(int i=0; i<3; i++) {
+			if(a[i] < m_min[i]) m_min[i] = a[i];
+			if(a[i] > m_max[i]) m_max[i] = a[i];
+		}
 	}
 	
 	/**
@@ -50,6 +55,8 @@ public:
 	void extend(const CBoundingBox& box)
 	{
 		// --- PUT YOUR CODE HERE ---
+		extend(box.m_min);
+		extend(box.m_max);
 	}
 	
 	/**
@@ -59,6 +66,12 @@ public:
 	bool overlaps(const CBoundingBox& box)
 	{
 		// --- PUT YOUR CODE HERE ---
+		for(int i=0; i<2; i++) {
+			if((m_min[i] + Epsilon) < box.m_max[i] && (m_max[i] + Epsilon) > box.m_min[i]);
+			else 
+				return false;
+		}
+
 		return true;
 	}
 	
@@ -70,7 +83,29 @@ public:
 	 */
 	void clip(const Ray& ray, float& t0, float& t1)
 	{
-		// --- PUT YOUR CODE HERE ---
+		float x1 = (m_min[0] - ray.org[0]) / ray.dir[0];
+		float y1 = (m_min[1] - ray.org[1]) / ray.dir[1];
+		float z1 = (m_min[2] - ray.org[2]) / ray.dir[2];
+
+		float x2 = (m_max[0] - ray.org[0]) / ray.dir[0];
+		float y2 = (m_max[1] - ray.org[1]) / ray.dir[1];
+		float z2 = (m_max[2] - ray.org[2]) / ray.dir[2];
+
+		if (ray.dir[0] < 0) {
+			std::swap(x1, x2);
+		}
+
+		if (ray.dir[1] < 0) {
+			std::swap(y1, y2);
+		}
+
+		if (ray.dir[2] < 0) {
+			std::swap(z1, z2);
+		}
+
+		t0 = std::min(std::max(x1, y1), z1);
+		t1 = std::max(std::min(x2, y2), z2);
+
 	}
 	
 	
