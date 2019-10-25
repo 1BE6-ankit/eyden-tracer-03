@@ -57,32 +57,17 @@ public:
 		} else {
 			// --- PUT YOUR CODE HERE ---
 			d = (m_splitVal - ray.org[m_splitDim]) / ray.dir[m_splitDim];
-			std::shared_ptr<CBSPNode> near, far;
 
-			if (d > 0) {
-				near = m_pLeft;
-				far = m_pRight;
-			} else {
-				near = m_pRight;
-				far = m_pLeft;
-			}
-
-			// near = m_pLeft;
-			// far = m_pRight;
-
-			if (d > t1 || d < 0) {
-				// return near->traverse(ray, t0, t1);
-				return near->traverse(ray, t0, t1);
-			}
-			else if (d < t0) {
-				return far->traverse(ray, t0, t1);
-			}
-			else {
-				if(near->traverse(ray, t0, d)) {
+			if(d <= t0) {
+				return m_pRight->traverse(ray, t0, t1);
+			}else if(d >= t1) {
+				return m_pLeft->traverse(ray, t0, t1);
+			}else {
+				if(m_pLeft->traverse(ray, t0, d)) {
 					return true;
 				} 
-                
-				return far->traverse(ray, d, t1);
+				
+				return m_pRight->traverse(ray, d, t1);
 			}
 		}
 	}
