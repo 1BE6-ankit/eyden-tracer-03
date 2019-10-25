@@ -54,7 +54,7 @@ public:
 	virtual bool 			inVoxel(const CBoundingBox& box) const
 	{
 		// --- PUT YOUR CODE HERE ---
-		return true;
+		return calcBounds().overlaps(box);
 	}
 	
 	std::shared_ptr<IShader> getShader(void) const { return m_pShader; }

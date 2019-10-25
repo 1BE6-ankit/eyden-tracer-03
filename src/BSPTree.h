@@ -41,6 +41,53 @@ public:
 		std::shared_ptr<CBSPNode> pLeft;
 		std::shared_ptr<CBSPNode> pRight;
 		// --- PUT YOUR CODE HERE ---
+
+		// left and right vectors after splitting
+		std::vector<std::shared_ptr<CPrim>> vpPrims_left;
+		std::vector<std::shared_ptr<CPrim>> vpPrims_right;
+
+		// new voxels for left and right children
+		CBoundingBox voxel_left;
+		CBoundingBox voxel_right;
+
+		// get the split dimension and splitVal
+		splitDim = depth % 3;
+		splitVal = box.m_max[splitDim] - (box.m_max[splitDim] - box.m_min[splitDim]) / 2;
+
+		/********************************
+		 * Base Case
+		 * ******************************/
+		if(depth >=20 || vpPrims.size() <=4) {
+			std::shared_ptr<CBSPNode> some_leaf = std::make_shared<CBSPNode>(vpPrims);
+			return some_leaf;
+		}
+
+		// loop through primitives and sort into left and right voxels
+		for(auto prim : vpPrims) {
+			if(prim.get()->calcBounds().m_max[splitDim] < splitVal) {
+				vpPrims_left.push_back(prim);
+			} else {
+				vpPrims_right.push_back(prim);
+			}
+		}
+
+		// initialize new voxels
+		for(int i=0; i<3; i++) {
+			voxel_left.m_min[i] = box.m_min[i];
+			voxel_left.m_max[i] = box.m_max[i];
+
+			voxel_right.m_min[i] = box.m_min[i];
+			voxel_right.m_max[i] = box.m_max[i];
+		}
+
+		// adjust voxels appropriately
+		voxel_left.m_max[splitDim] = splitVal;
+		voxel_right.m_min[splitDim] += voxel_right.m_max[splitDim] - splitVal;
+
+		// get the right and left voxels
+		pLeft =  BuildTree(voxel_left, vpPrims_left, depth+1);
+		pRight = BuildTree(voxel_right, vpPrims_right, depth+1);
+
 		return std::make_shared<CBSPNode>(splitVal, splitDim, pLeft, pRight);
 	}
 
@@ -52,7 +99,12 @@ public:
 	bool Intersect(Ray& ray)
 	{
 		// --- PUT YOUR CODE HERE ---
-		return false;
+		// std::cout << "FOR RAY: " << ray.dir << std::endl;
+		// std::cout << CBSPNode::total << std::endl;
+		ray.t = std::numeric_limits<float>::infinity();
+		float t0, t1;
+		m_bounds.clip(ray, t0, t1);
+		return m_root.get()->traverse(ray, t0, t1);
 	}
 
 	

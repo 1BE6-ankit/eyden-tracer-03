@@ -11,7 +11,7 @@ public:
 	 * @brief Leaf node constructor
 	 * @param vpPrims The vector of pointers to the primitives included in the leaf node
 	 */
-	CBSPNode(const std::vector<std::shared_ptr<CPrim>>& vpPrims)
+	CBSPNode(const std::vector<std::shared_ptr<CPrim>> vpPrims)
 		: CBSPNode(vpPrims, 0, 0, nullptr, nullptr)
 	{}
 	/**
@@ -39,17 +39,69 @@ public:
 	 * @brief Traverses the ray \b ray and checks for intersection with a primitive
 	 * @details If the intersection is found, \b ray.t is updated
 	 * @param[in,out] ray The ray
-	 * @param[in,out] t0 The distance from ray origin at which the ray enters the scene
-	 * @param[in,out] t1 The distance from ray origin at which the ray leaves the scene
+	 * @param[in,out] t0 The dance from ray origin at which the ray enters the scene
+	 * @param[in,out] t1 The dance from ray origin at which the ray leaves the scene
 	 */
 	virtual bool traverse(Ray& ray, float& t0, float& t1)
 	{
+		float d;
+
 		if (isLeaf()) {
-			// --- PUT YOUR CODE HERE ---
-			return true;
+			// intersect with all the primites 
+			bool hit = false;
+			for(auto prim : m_vpPrims) {
+				if(prim.get()->Intersect(ray))
+					hit = true;
+			}
+			return hit;
 		} else {
 			// --- PUT YOUR CODE HERE ---
-			return true;
+			d = (m_splitVal - ray.org[m_splitDim]) / ray.dir[m_splitDim];
+			std::shared_ptr<CBSPNode> near, far;
+
+			if (d > 0) {
+				near = m_pLeft;
+				far = m_pRight;
+			} else {
+				near = m_pRight;
+				far = m_pLeft;
+			}
+
+			// near = m_pLeft;
+			// far = m_pRight;
+
+			if (ray.dir[m_splitDim] < 0) {
+				std::swap(near, far);
+			}
+
+			if (d > t1 || d < 0) {
+				// return near->traverse(ray, t0, t1);
+				if(near->traverse(ray, t0, t1)) return true;
+				else if(near != m_pLeft)
+				    return m_pLeft->traverse(ray, t0, t1);
+			}
+			else if (d < t0) {
+				// return far->traverse(ray, t0, t1);
+				if(far->traverse(ray, t0, t1)) return true;
+				else if(far != m_pRight)
+				    return m_pRight->traverse(ray, t0, t1);
+			}
+			else {
+				if(near->traverse(ray, t0, d)) {
+                    if(ray.t <= d) return true;
+					else if(near != m_pLeft) {
+					    if(m_pLeft->traverse(ray, t0, d))
+						    if(ray.t < d)return true;
+					}
+				} 
+                
+				if(far->traverse(ray, d, t1)) return true;
+				else if(far != m_pRight) {
+					return (m_pRight->traverse(ray, d, t1));
+				}
+
+				// return far->traverse(ray, d, t1);
+			}
 		}
 	}
 

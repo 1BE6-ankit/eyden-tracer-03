@@ -66,6 +66,23 @@ public:
 	{
 		CBoundingBox res;
 		// --- PUT YOUR CODE HERE ---
+		Vec3f s_min, s_max;
+
+		// min and max x coord
+		s_min[0] = m_center[0] - m_radius;
+		s_max[0] = m_center[0] + m_radius;
+
+		// min and max y coord
+		s_min[1] = m_center[1] - m_radius;
+		s_max[1] = m_center[1] + m_radius;
+
+		// min and max z coord
+		s_min[2] = m_center[2] - m_radius;
+		s_max[2] = m_center[2] + m_radius;
+
+		res.m_min = s_min;
+		res.m_max = s_max;
+
 		return res;
 	}
 	
